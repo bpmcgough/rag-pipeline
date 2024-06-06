@@ -1,0 +1,7 @@
+# langsmith
+langchain
+langchain_openai
+# chromadb
+langchain-chroma
+langchain_community
+jq
