@@ -4,10 +4,11 @@ from langchain.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain.load import dumps, loads
 from langchain_core.runnables import RunnablePassthrough
+from variables import settings
 
 class Query:
     def __init__(self, index):
-        self.llm = ChatOpenAI(temperature=0)
+        self.llm = ChatOpenAI(temperature=0, base_url="http://localhost:1234/v1", api_key="lm-studio", model=settings["model"])
         self.retriever = MultiQueryRetriever.from_llm(
             retriever=index.as_retriever(), llm=self.llm
         )
@@ -49,6 +50,7 @@ class Query:
             | (lambda x: x.split("\n"))
         )
     
+    # TODO: control whether or not this is used with settings.variables
     # Retrieve documents based on generated queries
     def get_retrieval_chain(self, question):
         return self.get_query_generator(question) | self.retriever.map() | self.rank_documents
@@ -63,7 +65,10 @@ class Query:
 
         prompt = ChatPromptTemplate.from_template(template)
 
-        retrieval_chain = self.get_retrieval_chain(question)
+        retriever = self.index.as_retriever()
+
+        # retrieval_chain = self.get_retrieval_chain(question)
+        retrieval_chain = retriever.invoke(question)
 
         # Chain
         final_rag_chain = (

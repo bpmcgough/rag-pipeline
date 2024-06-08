@@ -22,16 +22,31 @@ class Ingestor:
             data = json.load(file)
         
         qa_pairs = []
-        
-        for item in data["data"]:
-            for paragraph in item["paragraphs"]:
-                for qa in paragraph["qas"]:
-                    question = qa["question"]
-                    answers = qa.get("answers", [])
-                    qa_pairs.append({
-                        "question": question,
-                        "answers": answers
-                    })
+
+        item = data["data"][0]  # Access the first item in the data array
+        for paragraph in item["paragraphs"][:4]:  # Iterate over the first four paragraphs
+            # print("Context:", paragraph['context'])  # Log context
+            for qa in paragraph["qas"]:
+                # print('qa', qa)
+                # print("Source:", paragraph.get('source', 'No source provided'))  # Log source if available
+                question = qa["question"]
+                answers = qa.get("answers", [])
+                qa_pairs.append({
+                    "question": question,
+                    "answers": answers
+                })
+
+        # for item in data["data"][0]:
+        #     for paragraph in item["paragraphs"][:4]:
+        #         print("Context:", paragraph['context'])  # Log context
+        #         for qa in paragraph["qas"]:
+        #             print("Source:", paragraph.get('source', 'No source provided'))  # Log source if available
+        #             question = qa["question"]
+        #             answers = qa.get("answers", [])
+        #             qa_pairs.append({
+        #                 "question": question,
+        #                 "answers": answers
+        #             })
         
         # Create the vector index for contexts
         self.index = Chroma.from_documents(documents=contexts, embedding=OpenAIEmbeddings())
